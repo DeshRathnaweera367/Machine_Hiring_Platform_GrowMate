@@ -44,14 +44,14 @@ class MyBookingsScreen extends StatelessWidget {
                     leading: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network(
-                        booking.machine.image, // ✅ add ! to fix null issue
+                        booking.machine.image, // Image of machine
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
                       ),
                     ),
                     title: Text(
-                      booking.machine.name, // ✅ add ! to fix null issue
+                      booking.machine.name, // Machine name
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(

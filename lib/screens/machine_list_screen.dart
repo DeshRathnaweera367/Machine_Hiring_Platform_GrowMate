@@ -32,6 +32,16 @@ class _MachineListScreenState extends State<MachineListScreen> {
     'Hambantota',
   ];
 
+  final List<String> categories = [
+    'all',
+    'Tractor',
+    'Harvester',
+    'Seeder',
+    'Plough',
+    'Sprayer',
+    'Others',
+  ];
+
   @override
   Widget build(BuildContext context) {
     final filteredMachines = widget.machines.where((m) {
@@ -41,7 +51,7 @@ class _MachineListScreenState extends State<MachineListScreen> {
           m.owner.location.toLowerCase().contains(searchQuery.toLowerCase());
 
       final matchesCategory =
-          selectedCategory == 'all' || m.category == selectedCategory;
+          selectedCategory == 'all' || m.category.toLowerCase() == selectedCategory.toLowerCase();
 
       final matchesLocation =
           selectedLocation == 'all' || m.owner.location == selectedLocation;
@@ -81,128 +91,159 @@ class _MachineListScreenState extends State<MachineListScreen> {
             ),
             const SizedBox(height: 10),
 
-            /// Location filter
-            DropdownButtonFormField<String>(
-              value: selectedLocation,
-              items: locations
-                  .map(
-                    (loc) => DropdownMenuItem(
-                      value: loc,
-                      child: Text(loc),
+            /// Filters: Location & Category
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: selectedLocation,
+                    items: locations
+                        .map(
+                          (loc) => DropdownMenuItem(
+                            value: loc,
+                            child: Text(loc),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() => selectedLocation = value ?? 'all');
+                    },
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
                     ),
-                  )
-                  .toList(),
-              onChanged: (value) {
-                setState(() => selectedLocation = value ?? 'all');
-              },
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                filled: true,
-                fillColor: Colors.white,
-              ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: selectedCategory,
+                    items: categories
+                        .map(
+                          (cat) => DropdownMenuItem(
+                            value: cat,
+                            child: Text(cat),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() => selectedCategory = value ?? 'all');
+                    },
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
 
             /// Machine Grid
             Expanded(
-              child: GridView.builder(
-                itemCount: filteredMachines.length,
-                gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 0.7,
-                ),
-                itemBuilder: (context, index) {
-                  final machine = filteredMachines[index];
-
-                  return GestureDetector(
-                    onTap: () => widget.onMachineSelect(machine),
-                    child: Card(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+              child: filteredMachines.isEmpty
+                  ? const Center(child: Text('No machines found'))
+                  : GridView.builder(
+                      itemCount: filteredMachines.length,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 0.7,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          /// Image
-                          Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(16),
-                                ),
-                                child: Image.network(
-                                  machine.image,
-                                  height: 120,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Positioned(
-                                top: 8,
-                                right: 8,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: machine.availability == 'Available'
-                                        ? Colors.green
-                                        : Colors.orange,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    machine.availability,
-                                    style: const TextStyle(
-                                        color: Colors.white, fontSize: 12),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                      itemBuilder: (context, index) {
+                        final machine = filteredMachines[index];
 
-                          /// Info
-                          Padding(
-                            padding: const EdgeInsets.all(8),
+                        return GestureDetector(
+                          onTap: () => widget.onMachineSelect(machine),
+                          child: Card(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  machine.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16),
+                                /// Image
+                                Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(16),
+                                      ),
+                                      child: Image.network(
+                                        machine.image,
+                                        height: 120,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 8,
+                                      right: 8,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: machine.availability == 'Available'
+                                              ? Colors.green
+                                              : Colors.orange,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          machine.availability,
+                                          style: const TextStyle(
+                                              color: Colors.white, fontSize: 12),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${machine.owner.name} • ${machine.owner.location}',
-                                  style: const TextStyle(
-                                      fontSize: 12, color: Colors.grey),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'LKR ${machine.pricePerDay}/day',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green,
+
+                                /// Info
+                                Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        machine.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${machine.owner.name} • ${machine.owner.location}',
+                                        style: const TextStyle(
+                                            fontSize: 12, color: Colors.grey),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'LKR ${machine.pricePerDay}/day',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),

@@ -60,17 +60,19 @@ class Machine {
   });
 }
 
-// Sample data
-List<Machine> sampleMachines = [
+// =========================
+// Sample Data (can be replaced with full 20-machine list)
+// =========================
+List<Machine> machines = [
   Machine(
     id: '1',
-    name: 'Tractor 5000',
-    category: 'tractor',
-    description: 'Powerful tractor for farming and transportation.',
-    image: 'https://via.placeholder.com/400x300',
+    name: 'Rice Harvester 1000',
+    category: 'Rice',
+    description: 'Efficient rice harvester for small and medium fields.',
+    image: 'rice1.jpg',
     availability: 'Available',
     pricePerDay: 15000,
-    pricePerHour: 1000,
+    pricePerHour: 2000,
     owner: Owner(
       name: 'Kamal Perera',
       location: 'Anuradhapura',
@@ -80,23 +82,23 @@ List<Machine> sampleMachines = [
     ),
     specifications: Specifications(
       brand: 'John Deere',
-      model: 'JD5000',
-      year: 2021,
+      model: 'RH1000',
+      year: 2022,
       fuelType: 'Diesel',
-      horsepower: '120HP',
-      capacity: '5 Tons',
+      horsepower: '100HP',
+      capacity: '1.5 Acres/hr',
     ),
-    features: ['GPS Enabled', 'Air Conditioning', 'Auto Transmission'],
+    features: ['GPS Enabled', 'Auto Steering'],
   ),
   Machine(
     id: '2',
-    name: 'Harvester X',
-    category: 'harvester',
-    description: 'Efficient harvester for all crops.',
-    image: 'https://via.placeholder.com/400x300',
+    name: 'Rice Harvester 2000',
+    category: 'Rice',
+    description: 'High capacity rice harvester for large farms.',
+    image: 'rice2.jpg',
     availability: 'Available',
     pricePerDay: 20000,
-    pricePerHour: 1500,
+    pricePerHour: 2500,
     owner: Owner(
       name: 'Sunil Fernando',
       location: 'Matara',
@@ -106,11 +108,12 @@ List<Machine> sampleMachines = [
     ),
     specifications: Specifications(
       brand: 'Kubota',
-      model: 'HBX200',
-      year: 2022,
+      model: 'RH2000',
+      year: 2023,
       fuelType: 'Diesel',
-      horsepower: '150HP',
+      horsepower: '120HP',
+      capacity: '2 Acres/hr',
     ),
-    features: ['Auto Steering', 'Crop Sensor', 'Easy Maintenance'],
+    features: ['Auto Steering', 'Easy Maintenance'],
   ),
 ];

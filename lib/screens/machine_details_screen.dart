@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import '../models/machine_model.dart';
+import '../models/booking_model.dart';
+import 'payment_screen.dart';
 
 class MachineDetailsScreen extends StatelessWidget {
   final Machine machine;
-  final Function(Machine) onBookNow;
   final VoidCallback onBack;
 
   const MachineDetailsScreen({
     super.key,
     required this.machine,
-    required this.onBookNow,
     required this.onBack,
   });
 
@@ -54,7 +54,6 @@ class MachineDetailsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Image
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: Image.network(
@@ -64,9 +63,7 @@ class MachineDetailsScreen extends StatelessWidget {
                         fit: BoxFit.cover,
                       ),
                     ),
-
                     const SizedBox(height: 12),
-
                     Text(
                       machine.name,
                       style: const TextStyle(
@@ -74,16 +71,9 @@ class MachineDetailsScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
                     const SizedBox(height: 6),
-                    Text(
-                      machine.description,
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-
+                    Text(machine.description, style: const TextStyle(color: Colors.grey)),
                     const SizedBox(height: 16),
-
-                    // Prices
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -91,10 +81,7 @@ class MachineDetailsScreen extends StatelessWidget {
                         _priceBox('Per Hour', machine.pricePerHour),
                       ],
                     ),
-
                     const SizedBox(height: 20),
-
-                    // Owner Info
                     ListTile(
                       leading: const CircleAvatar(
                         backgroundColor: Colors.green,
@@ -110,19 +97,10 @@ class MachineDetailsScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 20),
-
-                    // Specifications
-                    const Text(
-                      'Specifications',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    const Text('Specifications',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -131,9 +109,12 @@ class MachineDetailsScreen extends StatelessWidget {
                         _specBox('Model', machine.specifications.model),
                         _specBox('Year', machine.specifications.year.toString()),
                         _specBox('Fuel', machine.specifications.fuelType),
+                        if (machine.specifications.horsepower != null)
+                          _specBox('HP', machine.specifications.horsepower!),
+                        if (machine.specifications.capacity != null)
+                          _specBox('Capacity', machine.specifications.capacity!),
                       ],
                     ),
-
                     const SizedBox(height: 80),
                   ],
                 ),
@@ -146,13 +127,30 @@ class MachineDetailsScreen extends StatelessWidget {
               color: Colors.white,
               child: ElevatedButton.icon(
                 onPressed: machine.availability == 'Available'
-                    ? () => onBookNow(machine)
+                    ? () {
+                        // Create a booking object for PaymentScreen
+                        final booking = Booking(
+                          id: 'B${DateTime.now().millisecondsSinceEpoch}',
+                          machine: machine,
+                          bookingDate: DateTime.now(),
+                          startDate: DateTime.now(),
+                          endDate: DateTime.now().add(const Duration(days: 1)),
+                          totalDays: 1,
+                          totalPrice: machine.pricePerDay.toDouble(),
+                          status: 'pending',
+                        );
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PaymentScreen(booking: booking),
+                          ),
+                        );
+                      }
                     : null,
                 icon: const Icon(Icons.calendar_today),
                 label: Text(
-                  machine.availability == 'Available'
-                      ? 'Book Now'
-                      : 'Not Available',
+                  machine.availability == 'Available' ? 'Book Now' : 'Not Available',
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
@@ -172,10 +170,7 @@ class MachineDetailsScreen extends StatelessWidget {
         Text(label, style: const TextStyle(color: Colors.grey)),
         Text(
           'LKR $price',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -187,10 +182,7 @@ class MachineDetailsScreen extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(title, style: const TextStyle(fontSize: 10)),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
     );
