@@ -56,8 +56,8 @@ class MachineDetailsScreen extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Image.network(
-                        machine.image,
+                      child: Image.asset(
+                        machine.image, // ✅ Use asset image
                         height: 220,
                         width: double.infinity,
                         fit: BoxFit.cover,
@@ -77,8 +77,8 @@ class MachineDetailsScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _priceBox('Per Day', machine.pricePerDay),
-                        _priceBox('Per Hour', machine.pricePerHour),
+                        _priceBox('Per Day', machine.pricePerDay.toDouble()),
+                        _priceBox('Per Hour', machine.pricePerHour.toDouble()),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -128,16 +128,13 @@ class MachineDetailsScreen extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: machine.availability == 'Available'
                     ? () {
-                        // Create a booking object for PaymentScreen
+                        // Create a booking for PaymentScreen
                         final booking = Booking(
                           id: 'B${DateTime.now().millisecondsSinceEpoch}',
                           machine: machine,
-                          bookingDate: DateTime.now(),
-                          startDate: DateTime.now(),
-                          endDate: DateTime.now().add(const Duration(days: 1)),
-                          totalDays: 1,
-                          totalPrice: machine.pricePerDay.toDouble(),
-                          status: 'pending',
+                          userId: 'current_user', // replace with actual user ID
+                          date: DateTime.now(),
+                          hours: 1, // default 1 hour booking
                         );
 
                         Navigator.push(

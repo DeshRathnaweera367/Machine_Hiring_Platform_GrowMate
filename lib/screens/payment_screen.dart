@@ -3,7 +3,7 @@ import '../models/booking_model.dart';
 import 'invoice_screen.dart';
 
 class PaymentScreen extends StatelessWidget {
-  final Booking booking; // Pass the full booking, not just price
+  final Booking booking; // Pass the full booking
 
   const PaymentScreen({
     super.key,
@@ -12,6 +12,9 @@ class PaymentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Calculate total price dynamically
+    final totalPrice = booking.machine.pricePerHour * booking.hours;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Payment')),
       body: Padding(
@@ -20,7 +23,7 @@ class PaymentScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Total Amount: LKR ${booking.totalPrice.toStringAsFixed(0)}',
+              'Total Amount: LKR $totalPrice',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 30),
@@ -33,11 +36,19 @@ class PaymentScreen extends StatelessWidget {
                 minimumSize: const Size(double.infinity, 50),
               ),
               onPressed: () {
-                // After payment, navigate to invoice
+                // Navigate to invoice screen, passing the same booking
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => InvoiceScreen(booking: booking),
+                    builder: (_) => InvoiceScreen(
+                      booking: Booking(
+                        id: booking.id,
+                        machine: booking.machine,
+                        userId: booking.userId,
+                        date: booking.date,
+                        hours: booking.hours,
+                      ),
+                    ),
                   ),
                 );
               },
@@ -52,11 +63,19 @@ class PaymentScreen extends StatelessWidget {
                 minimumSize: const Size(double.infinity, 50),
               ),
               onPressed: () {
-                // After payment, navigate to invoice
+                // Navigate to invoice screen, passing the same booking
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => InvoiceScreen(booking: booking),
+                    builder: (_) => InvoiceScreen(
+                      booking: Booking(
+                        id: booking.id,
+                        machine: booking.machine,
+                        userId: booking.userId,
+                        date: booking.date,
+                        hours: booking.hours,
+                      ),
+                    ),
                   ),
                 );
               },

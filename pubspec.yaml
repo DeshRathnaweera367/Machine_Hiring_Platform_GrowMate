@@ -1,33 +1,46 @@
 name: growmate_machine_hiring_platform
-description: GrowMate - Harvester Machine Hiring Platform for Rural Farmers in Sri Lanka
-publish_to: 'none'
-
-version: 1.0.0+1
+description: GrowMate Harvester Machine Hiring Platform
+publish_to: 'none' # since this is a local project
 
 environment:
-  sdk: ">=3.6.0 <4.0.0"
+  sdk: ">=2.19.0 <3.0.0"
+  flutter: ">=3.27.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-
-  cupertino_icons: ^1.0.8
-  flutter_screenutil: ^5.9.0
-  google_fonts: ^6.2.1
-  intl: ^0.20.2
-  provider: ^6.1.2
-  firebase_core: ^4.4.0
-  firebase_auth: ^6.1.4
-  cloud_firestore: ^6.1.2
-  cached_network_image: ^3.3.1
+  cupertino_icons: ^1.0.2
+  flutter_screenutil: ^6.1.1
+  google_fonts: ^8.0.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
+
   uses-material-design: true
 
   assets:
-    - assets/images/
+    - assets/images/rice1.jpg
+    - assets/images/rice2.jpg
+    - assets/images/rice3.jpg
+    - assets/images/rice4.jpg
+    - assets/images/rice5.jpg
+    - assets/images/rice6.jpg
+    - assets/images/rice7.jpg
+    - assets/images/rice8.jpg
+    - assets/images/rice9.jpg
+    - assets/images/rice10.jpg
+    - assets/images/corn1.jpg
+    - assets/images/corn2.jpg
+    - assets/images/corn3.jpg
+    - assets/images/corn4.jpg
+    - assets/images/corn5.jpg
+    - assets/images/corn6.jpg
+    - assets/images/corn7.jpg
+    - assets/images/corn8.jpg
+    - assets/images/corn9.jpg
+    - assets/images/corn10.jpg
+    

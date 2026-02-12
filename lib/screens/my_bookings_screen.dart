@@ -32,6 +32,7 @@ class MyBookingsScreen extends StatelessWidget {
               itemCount: bookings.length,
               itemBuilder: (context, index) {
                 final booking = bookings[index];
+                final totalPrice = booking.machine.pricePerHour * booking.hours;
 
                 return Card(
                   margin: const EdgeInsets.all(8),
@@ -43,25 +44,24 @@ class MyBookingsScreen extends StatelessWidget {
                     contentPadding: const EdgeInsets.all(12),
                     leading: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        booking.machine.image, // Image of machine
+                      child: Image.asset(
+                        booking.machine.image, // ✅ Use asset image
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
                       ),
                     ),
                     title: Text(
-                      booking.machine.name, // Machine name
+                      booking.machine.name,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
-                      'From: ${_formatDate(booking.startDate)}\n'
-                      'To: ${_formatDate(booking.endDate)}\n'
-                      'Status: ${booking.status}',
+                      'Date: ${_formatDate(booking.date)}\n'
+                      'Hours: ${booking.hours}',
                       style: const TextStyle(fontSize: 12),
                     ),
                     trailing: Text(
-                      'LKR ${booking.totalPrice.toStringAsFixed(0)}',
+                      'LKR $totalPrice',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.green,

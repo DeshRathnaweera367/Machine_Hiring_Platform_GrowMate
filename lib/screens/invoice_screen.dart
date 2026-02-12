@@ -11,6 +11,9 @@ class InvoiceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Calculate total price (using pricePerHour and booked hours)
+    final totalPrice = booking.machine.pricePerHour * booking.hours;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Invoice')),
       body: Padding(
@@ -29,22 +32,22 @@ class InvoiceScreen extends StatelessWidget {
             Text('Machine: ${booking.machine.name}', style: const TextStyle(fontSize: 16)),
             Text('Owner: ${booking.machine.owner.name}'),
             Text('Booking ID: ${booking.id}'),
-            Text('Status: ${booking.status[0].toUpperCase()}${booking.status.substring(1)}'),
+            Text('Category: ${booking.machine.category}'),
             const SizedBox(height: 10),
 
-            /// Booking Dates
-            Text('From: ${_formatDate(booking.startDate)}'),
-            Text('To: ${_formatDate(booking.endDate)}'),
+            /// Booking Date & Hours
+            Text('Booking Date: ${_formatDate(booking.date)}'),
+            Text('Hours Booked: ${booking.hours}'),
             const SizedBox(height: 10),
 
             /// Total Paid
             Text(
-              'Total Paid: LKR ${booking.totalPrice.toStringAsFixed(0)}',
+              'Total Paid: LKR $totalPrice',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 30),
 
-            /// Download Button
+            /// Download Button (placeholder)
             ElevatedButton.icon(
               icon: const Icon(Icons.download),
               label: const Text('Download Invoice'),
@@ -65,7 +68,7 @@ class InvoiceScreen extends StatelessWidget {
     );
   }
 
-  // Helper to format DateTime as dd/mm/yyyy
+  /// Helper to format DateTime as dd/mm/yyyy
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/'
         '${date.month.toString().padLeft(2, '0')}/'

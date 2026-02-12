@@ -17,13 +17,13 @@ class MockHttpOverrides extends HttpOverrides {
 }
 
 void main() {
-  // 1. Initial setup for the test environment
+  // Override HTTP globally for network images during tests
   HttpOverrides.global = MockHttpOverrides();
 
-  testWidgets('GrowMate app loads Machine List screen and navigates to details',
+  testWidgets('GrowMate app loads machine list and navigates to details',
       (WidgetTester tester) async {
-    
-    // 2. Initialize ScreenUtil for the test (fixes 'setWidth' errors)
+
+    // Initialize ScreenUtil to avoid layout errors
     await tester.pumpWidget(
       ScreenUtilInit(
         designSize: const Size(360, 690), // Match your design size
@@ -31,31 +31,33 @@ void main() {
       ),
     );
 
-    // 3. Wait for the app to load and settle
-    // If you have a splash screen or Firebase loading, you might need multiple pumps
+    // Wait for widgets to build
     await tester.pumpAndSettle();
 
-    // 4. Verify the App Bar title
+    // Verify the AppBar of the home screen
     expect(find.text('GrowMate'), findsOneWidget);
 
-    // 5. Find the machine list cards
-    // We check for 'findsWidgets' (plural) to ensure the list isn't empty
+    // Find all Cards (machines) on the list
     final cardFinder = find.byType(Card);
     expect(cardFinder, findsWidgets);
 
-    // 6. Tap the first machine to test navigation
+    // Tap the first card to navigate to MachineDetailsScreen
     await tester.tap(cardFinder.first);
-    
-    // Wait for the navigation animation to finish
     await tester.pumpAndSettle();
 
-    // 7. Verify we are now on the details screen
+    // Verify MachineDetailsScreen opened
     expect(find.byType(MachineDetailsScreen), findsOneWidget);
 
-    // 8. Verify the details screen actually has content
-    expect(find.descendant(
-      of: find.byType(MachineDetailsScreen), 
-      matching: find.byType(Text)
-    ), findsWidgets);
+    // Check that the machine name and description are visible
+    expect(
+      find.descendant(
+        of: find.byType(MachineDetailsScreen),
+        matching: find.byType(Text),
+      ),
+      findsWidgets,
+    );
+
+    // Check that the 'Book Now' button exists if the machine is available
+    expect(find.widgetWithText(ElevatedButton, 'Book Now'), findsWidgets);
   });
 }
