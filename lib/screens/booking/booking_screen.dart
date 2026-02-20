@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/harvester.dart';
+import '../../models/user.dart';
+import '../../services/payment_service.dart';
+import '../../services/web_payment_service.dart';
 
 // This screen handles the booking process
 class BookingScreen extends StatefulWidget {
@@ -493,7 +497,7 @@ class _BookingScreenState extends State<BookingScreen> {
                   ),
                 ),
                 onPressed: _isBookingValid()
-                    ? () => _showBookingConfirmation(context)
+                    ? () => _showPaymentConfirmation(context)
                     : null,
                 child: const Text(
                   'Confirm Booking',
@@ -733,14 +737,17 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
-  // Show booking confirmation dialog
-  void _showBookingConfirmation(BuildContext context) {
+  // Show payment confirmation dialog with platform-specific payment
+  void _showPaymentConfirmation(BuildContext context) {
     String bookingDetails;
     if (_rentalType == 'daily') {
       bookingDetails = '${_formatDate(_startDate!)} - ${_formatDate(_endDate!)} (${_calculateDays()} days)';
     } else {
       bookingDetails = '${_formatDate(_startDate!)} at ${_formatTime(_startTime!)} for $_rentalHours hours (ends at ${_calculateEndTime()})';
     }
+
+    final totalAmount = _calculateTotal();
+    final orderId = PaymentService.generateOrderId();
 
     showDialog(
       context: context,
@@ -750,12 +757,12 @@ class _BookingScreenState extends State<BookingScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Booking Request Sent!',
+              'Booking Confirmation',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
-              'Your request for ${widget.harvester.name} has been sent to the owner.',
+              'Your booking for ${widget.harvester.name} is ready.',
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -765,16 +772,121 @@ class _BookingScreenState extends State<BookingScreen> {
             ),
             const SizedBox(height: 8),
             Text(bookingDetails),
-            const SizedBox(height: 4),
-            Text('Total: LKR ${_calculateTotal().toStringAsFixed(0)}'),
+            Text('Total: LKR ${totalAmount.toStringAsFixed(2)}'),
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 8),
+            const Text(
+              'Proceed to payment?',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () {
+              Navigator.pop(context); // Close dialog
               Navigator.popUntil(context, (route) => route.isFirst);
             },
-            child: const Text('Back to Home'),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green[700],
+            ),
+            onPressed: () async {
+              Navigator.pop(context); // Close confirmation dialog
+              
+              // Show loading dialog
+              if (!context.mounted) return;
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+              
+              // Choose payment method based on platform
+              if (kIsWeb) {
+                // Web payment
+                WebPaymentService.makePayment(
+                  context: context,
+                  orderId: orderId,
+                  amount: totalAmount,
+                  items: '${widget.harvester.name} - $bookingDetails',
+                  customerName: currentUser.name,
+                  customerEmail: currentUser.email,
+                  customerPhone: currentUser.phone,
+                  customerAddress: currentUser.address,
+                  customerCity: currentUser.city,
+                  onSuccess: () {
+                    debugPrint('✅ Payment successful for order: $orderId');
+                    if (context.mounted) {
+                      Navigator.pop(context); // Close loading dialog
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Booking confirmed! Payment successful.'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      Navigator.popUntil(context, (route) => route.isFirst);
+                    }
+                  },
+                  onError: () {
+                    debugPrint('❌ Payment failed for order: $orderId');
+                    if (context.mounted) {
+                      Navigator.pop(context); // Close loading dialog
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Payment failed. Please try again.'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  },
+                );
+              } else {
+                // Mobile payment
+                PaymentService.makePayment(
+                  context: context,
+                  orderId: orderId,
+                  amount: totalAmount,
+                  items: '${widget.harvester.name} - $bookingDetails',
+                  customerName: currentUser.name,
+                  customerEmail: currentUser.email,
+                  customerPhone: currentUser.phone,
+                  customerAddress: currentUser.address,
+                  customerCity: currentUser.city,
+                  onSuccess: () {
+                    debugPrint('✅ Payment successful for order: $orderId');
+                    if (context.mounted) {
+                      Navigator.pop(context); // Close loading dialog
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Booking confirmed! Payment successful.'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      Navigator.popUntil(context, (route) => route.isFirst);
+                    }
+                  },
+                  onError: () {
+                    debugPrint('❌ Payment failed for order: $orderId');
+                    if (context.mounted) {
+                      Navigator.pop(context); // Close loading dialog
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Payment failed. Please try again.'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  },
+                );
+              }
+            },
+            child: const Text('Pay Now'),
           ),
         ],
       ),

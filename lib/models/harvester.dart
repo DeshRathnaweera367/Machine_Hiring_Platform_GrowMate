@@ -45,13 +45,10 @@ class Harvester {
 
 // ============================================
 // EXPANDED MOCK DATA - 20 HARVESTERS
-// 10 Corn Harvesters + 10 Rice Harvesters
-// All with Sri Lankan locations, names, and prices in LKR
 // ============================================
 
 List<Harvester> mockHarvesters = [
   // ========== CORN HARVESTERS (10 machines) ==========
-  // Corn farming is popular in areas like Ampara, Monaragala, Anuradhapura
   
   // 1. Premium Corn Harvester - Ampara
   Harvester(
@@ -64,6 +61,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 85000,
     pricePerHour: 11000,
     rating: 4.9,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'corn_harvester_1.jpg',
     features: ['8-row corn head', 'GPS Navigation', 'Auto-steer', 'Yield Monitor', 'Climate-controlled cab', 'Corn loss sensors'],
     isAvailable: true,
@@ -86,6 +84,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 72000,
     pricePerHour: 9500,
     rating: 4.7,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'corn_harvester_2.jpg',
     features: ['6-row corn head', 'AFS Connect', '4WD', 'Air Conditioning', 'Auto header height'],
     isAvailable: true,
@@ -108,6 +107,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 78000,
     pricePerHour: 10200,
     rating: 4.8,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'corn_harvester_3.jpg',
     features: ['Twin rotor', 'IntelliSense', '8-row corn head', 'Premium cab', 'Auto header'],
     isAvailable: false,
@@ -130,6 +130,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 52000,
     pricePerHour: 6800,
     rating: 4.5,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'corn_harvester_4.jpg',
     features: ['4-row corn head', 'Basic GPS', 'Air Conditioning', 'Grain tank 300 bu'],
     isAvailable: true,
@@ -152,6 +153,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 92000,
     pricePerHour: 12000,
     rating: 4.9,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'corn_harvester_5.jpg',
     features: ['12-row corn head', 'CEMOS Auto', '3D cleaning', 'GPS Pilot', 'Camera system'],
     isAvailable: true,
@@ -174,6 +176,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 39000,
     pricePerHour: 5200,
     rating: 4.4,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'corn_harvester_6.jpg',
     features: ['2-row corn head', 'Compact size', 'Easy operation', 'Low fuel consumption'],
     isAvailable: true,
@@ -196,6 +199,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 98000,
     pricePerHour: 12800,
     rating: 5.0,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'corn_harvester_7.jpg',
     features: ['10-row corn head', 'IDEALharvest', 'Auto machine setup', 'Smart cab', '4K cameras'],
     isAvailable: true,
@@ -218,6 +222,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 63000,
     pricePerHour: 8200,
     rating: 4.6,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'corn_harvester_8.jpg',
     features: ['5-row corn head', 'TopLiner', 'Air conditioning', 'Efficient cleaning'],
     isAvailable: false,
@@ -240,6 +245,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 68000,
     pricePerHour: 8900,
     rating: 4.7,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'corn_harvester_9.jpg',
     features: ['6-row corn head', 'MagnaTrac', 'Cab comfort', 'Yield tracking'],
     isAvailable: true,
@@ -262,6 +268,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 55000,
     pricePerHour: 7200,
     rating: 4.5,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'corn_harvester_10.jpg',
     features: ['4-row corn head', 'Rotary separator', 'Air conditioned cab', 'Easy controls'],
     isAvailable: true,
@@ -274,7 +281,6 @@ List<Harvester> mockHarvesters = [
   ),
   
   // ========== RICE HARVESTERS (10 machines) ==========
-  // Rice farming is popular in areas like Anuradhapura, Polonnaruwa, Ampara, Kurunegala
   
   // 11. Premium Rice Harvester - Anuradhapura
   Harvester(
@@ -287,6 +293,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 89000,
     pricePerHour: 11500,
     rating: 4.9,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'rice_harvester_1.jpg',
     features: ['Rice track system', 'Low ground pressure', 'Yield mapping', 'Grain quality sensors', 'Auto-float header'],
     isAvailable: true,
@@ -309,6 +316,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 68000,
     pricePerHour: 8900,
     rating: 4.8,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'rice_harvester_2.jpg',
     features: ['Rice tracks', 'Low damage threshing', 'Auto header', 'Compact design', 'Easy maintenance'],
     isAvailable: true,
@@ -331,6 +339,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 59000,
     pricePerHour: 7600,
     rating: 4.7,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'rice_harvester_3.jpg',
     features: ['4-row rice header', 'Rubber tracks', 'Smart threshing', 'Grain tank 1500L'],
     isAvailable: true,
@@ -353,6 +362,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 76000,
     pricePerHour: 9800,
     rating: 4.9,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'rice_harvester_4.jpg',
     features: ['5-row rice header', 'e-CDIS', 'Rice quality sensor', 'Auto leveling', 'Premium cab'],
     isAvailable: false,
@@ -375,6 +385,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 81000,
     pricePerHour: 10500,
     rating: 4.8,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'rice_harvester_5.jpg',
     features: ['Rice tracks', '6-row rice header', 'AFS Harvest Command', 'Grain saving system'],
     isAvailable: true,
@@ -397,6 +408,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 46000,
     pricePerHour: 5900,
     rating: 4.5,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'rice_harvester_6.jpg',
     features: ['3-row rice header', 'Compact size', 'Low fuel use', 'Easy operation'],
     isAvailable: true,
@@ -419,6 +431,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 77000,
     pricePerHour: 10000,
     rating: 4.8,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'rice_harvester_7.jpg',
     features: ['5-row rice header', '3D cleaning system', 'Rice-specific concave', 'Auto pilot'],
     isAvailable: true,
@@ -441,6 +454,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 73000,
     pricePerHour: 9400,
     rating: 4.7,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'rice_harvester_8.jpg',
     features: ['Twin rotor rice design', 'Rice tracks', 'Opti-Fan', 'IntelliSense rice'],
     isAvailable: true,
@@ -463,6 +477,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 69000,
     pricePerHour: 9000,
     rating: 4.6,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'rice_harvester_9.jpg',
     features: ['4-row rice header', 'Rice-specific rotors', 'Automation system', 'Comfort cab'],
     isAvailable: false,
@@ -485,6 +500,7 @@ List<Harvester> mockHarvesters = [
     pricePerDay: 52000,
     pricePerHour: 6800,
     rating: 4.4,
+    // ✅ Using .jpg extension to match actual files
     imageUrl: 'rice_harvester_10.jpg',
     features: ['4-row rice header', 'Reliable design', 'Easy service', 'Good fuel economy'],
     isAvailable: true,
@@ -498,25 +514,21 @@ List<Harvester> mockHarvesters = [
 ];
 
 // ============================================
-// HELPER FUNCTIONS TO FILTER BY TYPE AND LOCATION
+// HELPER FUNCTIONS
 // ============================================
 
-// Get only corn harvesters
 List<Harvester> getCornHarvesters() {
   return mockHarvesters.where((h) => h.machineType == 'Corn').toList();
 }
 
-// Get only rice harvesters
 List<Harvester> getRiceHarvesters() {
   return mockHarvesters.where((h) => h.machineType == 'Rice').toList();
 }
 
-// Get available harvesters only
 List<Harvester> getAvailableHarvesters() {
   return mockHarvesters.where((h) => h.isAvailable).toList();
 }
 
-// Get harvesters by type and availability
 List<Harvester> getHarvestersByType(String type, {bool onlyAvailable = false}) {
   var filtered = mockHarvesters.where((h) => h.machineType == type);
   if (onlyAvailable) {
@@ -525,21 +537,18 @@ List<Harvester> getHarvestersByType(String type, {bool onlyAvailable = false}) {
   return filtered.toList();
 }
 
-// Get harvesters by district
 List<Harvester> getHarvestersByDistrict(String district) {
   return mockHarvesters.where((h) => 
     h.district.toLowerCase() == district.toLowerCase()
   ).toList();
 }
 
-// Get harvesters within price range (per day in LKR)
 List<Harvester> getHarvestersByPriceRange(double minPrice, double maxPrice) {
   return mockHarvesters.where((h) => 
     h.pricePerDay >= minPrice && h.pricePerDay <= maxPrice
   ).toList();
 }
 
-// Search harvesters by name, location, or district
 List<Harvester> searchHarvesters(String query) {
   if (query.isEmpty) return mockHarvesters;
   return mockHarvesters.where((h) =>
@@ -550,7 +559,6 @@ List<Harvester> searchHarvesters(String query) {
   ).toList();
 }
 
-// Get harvester count by district
 Map<String, int> getHarvesterCountByDistrict() {
   Map<String, int> countMap = {};
   for (var harvester in mockHarvesters) {

@@ -15,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   // Controller for search text field
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   
   // List of harvesters after filtering (search results)
   List<Harvester> _filteredHarvesters = [];
@@ -26,6 +27,9 @@ class _HomeScreenState extends State<HomeScreen> {
   RangeValues _priceRange = const RangeValues(0, 100000);
   double _selectedRating = 0;
   bool _showAvailableOnly = false;
+  
+  // Animation controller for smooth transitions
+  bool _isFilterApplied = false;
 
   @override
   void initState() {
@@ -37,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -55,15 +60,33 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.green[700],
         elevation: 0,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list, color: Colors.white),
-            onPressed: () => _showFilterSheet(context),
+          // Filter button with active indicator
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.filter_list, color: Colors.white),
+                onPressed: () => _showFilterSheet(context),
+              ),
+              if (_isFilterApplied)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Colors.amber,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),
       body: Column(
         children: [
-          // SEARCH BAR
+          // SEARCH BAR with modern design
           Container(
             padding: const EdgeInsets.all(16),
             color: Colors.white,
@@ -71,21 +94,38 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: BoxDecoration(
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _searchFocusNode.hasFocus 
+                      ? Colors.green[700]! 
+                      : Colors.transparent,
+                  width: 2,
+                ),
               ),
               child: TextField(
                 controller: _searchController,
+                focusNode: _searchFocusNode,
                 onChanged: _filterHarvesters,
                 decoration: InputDecoration(
-                  hintText: 'Search by harvester name or location...',
+                  hintText: '🔍 Search by name, location, or owner...',
+                  hintStyle: TextStyle(color: Colors.grey[500]),
                   prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.clear, color: Colors.grey[600]),
+                          onPressed: () {
+                            _searchController.clear();
+                            _filterHarvesters('');
+                          },
+                        )
+                      : null,
                 ),
               ),
             ),
           ),
           
-          // CATEGORY CHIPS (quick filters)
+          // CATEGORY CHIPS (quick filters) with smooth scrolling
           Container(
             height: 50,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -95,6 +135,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 _buildCategoryChip('All', _selectedCategory == 'All'),
                 _buildCategoryChip('Corn', _selectedCategory == 'Corn'),
                 _buildCategoryChip('Rice', _selectedCategory == 'Rice'),
+                _buildCategoryChip('Premium', _selectedCategory == 'Premium'),
+                _buildCategoryChip('Budget', _selectedCategory == 'Budget'),
               ],
             ),
           ),
@@ -105,13 +147,28 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '${_filteredHarvesters.length} harvesters found',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
+                // Results count with animation
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.green[50],
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${_filteredHarvesters.length} ${_filteredHarvesters.length == 1 ? 'harvester' : 'harvesters'}',
+                    style: TextStyle(
+                      color: Colors.green[700],
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
+                
+                // Availability toggle
                 Row(
                   children: [
                     const Text('Available only', style: TextStyle(fontSize: 12)),
@@ -136,38 +193,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           
-          // LIST OF HARVESTERS
+          // LIST OF HARVESTERS with empty state handling
           Expanded(
             child: _filteredHarvesters.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 80,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No harvesters found',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Try adjusting your filters',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
+                ? _buildEmptyState()
                 : ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: _filteredHarvesters.length,
@@ -175,19 +204,101 @@ class _HomeScreenState extends State<HomeScreen> {
                       return HarvesterCard(
                         harvester: _filteredHarvesters[index],
                         onTap: () {
-                          // Navigate to details screen when tapped
+                          // Navigate to details screen with smooth transition
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => HarvesterDetailsScreen(
-                                harvester: _filteredHarvesters[index],
-                              ),
+                            PageRouteBuilder(
+                              pageBuilder: (context, animation, secondaryAnimation) =>
+                                  HarvesterDetailsScreen(
+                                    harvester: _filteredHarvesters[index],
+                                  ),
+                              transitionsBuilder:
+                                  (context, animation, secondaryAnimation, child) {
+                                const begin = Offset(1.0, 0.0);
+                                const end = Offset.zero;
+                                const curve = Curves.easeInOut;
+                                var tween = Tween(begin: begin, end: end)
+                                    .chain(CurveTween(curve: curve));
+                                var offsetAnimation = animation.drive(tween);
+                                return SlideTransition(
+                                  position: offsetAnimation,
+                                  child: child,
+                                );
+                              },
                             ),
                           );
                         },
                       );
                     },
                   ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Empty state widget
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Animated empty state icon
+          TweenAnimationBuilder(
+            tween: Tween<double>(begin: 0, end: 1),
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.elasticOut,
+            builder: (context, double scale, child) {
+              return Transform.scale(
+                scale: scale,
+                child: Icon(
+                  Icons.search_off,
+                  size: 100,
+                  color: Colors.grey[400],
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'No harvesters found',
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try adjusting your search or filters',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[500],
+            ),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () {
+              // Reset all filters
+              setState(() {
+                _searchController.clear();
+                _selectedCategory = 'All';
+                _showAvailableOnly = false;
+                _priceRange = const RangeValues(0, 100000);
+                _selectedRating = 0;
+                _isFilterApplied = false;
+                _applyAllFilters();
+              });
+            },
+            icon: const Icon(Icons.refresh),
+            label: const Text('Reset Filters'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green[700],
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
           ),
         ],
       ),
@@ -212,6 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _selectedCategory = label;
             _applyAllFilters();
+            _isFilterApplied = true;
           });
         },
         backgroundColor: Colors.grey[200],
@@ -220,6 +332,8 @@ class _HomeScreenState extends State<HomeScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
+        elevation: isSelected ? 2 : 0,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
     );
   }
@@ -249,9 +363,19 @@ class _HomeScreenState extends State<HomeScreen> {
     
     // Apply category filter
     if (_selectedCategory != 'All') {
-      results = results.where((harvester) => 
-        harvester.machineType == _selectedCategory
-      ).toList();
+      if (_selectedCategory == 'Premium') {
+        results = results.where((harvester) => 
+          harvester.pricePerDay >= 80000
+        ).toList();
+      } else if (_selectedCategory == 'Budget') {
+        results = results.where((harvester) => 
+          harvester.pricePerDay < 50000
+        ).toList();
+      } else {
+        results = results.where((harvester) => 
+          harvester.machineType == _selectedCategory
+        ).toList();
+      }
     }
     
     // Apply availability filter
@@ -283,24 +407,26 @@ class _HomeScreenState extends State<HomeScreen> {
     double tempMax = _priceRange.end;
     double tempRating = _selectedRating;
     String tempCategory = _selectedCategory;
+    bool tempAvailable = _showAvailableOnly;
     
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
+      backgroundColor: Colors.white,
       builder: (context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setSheetState) {
             return DraggableScrollableSheet(
-              initialChildSize: 0.7,
+              initialChildSize: 0.75,
               maxChildSize: 0.9,
               minChildSize: 0.5,
               expand: false,
               builder: (context, scrollController) {
                 return Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -316,109 +442,290 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      Text(
-                        'Filter Harvesters',
-                        style: GoogleFonts.poppins(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
                       
-                      // Price Range
-                      const Text('Price Range (per day)',
-                          style: TextStyle(fontWeight: FontWeight.w500)),
-                      const SizedBox(height: 8),
-                      RangeSlider(
-                        values: RangeValues(tempMin, tempMax),
-                        min: 0,
-                        max: 100000,
-                        divisions: 20,
-                        labels: RangeLabels(
-                          'LKR ${tempMin.round()}',
-                          'LKR ${tempMax.round()}',
-                        ),
-                        onChanged: (values) {
-                          setSheetState(() {
-                            tempMin = values.start;
-                            tempMax = values.end;
-                          });
-                        },
-                      ),
+                      // Header
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('LKR ${tempMin.round()}', 
-                              style: const TextStyle(fontWeight: FontWeight.bold)),
-                          Text('LKR ${tempMax.round()}', 
-                              style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(
+                            'Filter Harvesters',
+                            style: GoogleFonts.poppins(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green[800],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.pop(context),
+                            color: Colors.grey[600],
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
                       
-                      // Rating Filter
-                      const Text('Minimum Rating',
-                          style: TextStyle(fontWeight: FontWeight.w500)),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        children: [0.0, 3.0, 3.5, 4.0, 4.5].map((rating) {
-                          return FilterChip(
-                            label: Text(rating == 0 ? 'Any' : '$rating+'),
-                            selected: tempRating == rating,
-                            onSelected: (selected) {
-                              setSheetState(() {
-                                tempRating = selected ? rating : 0;
-                              });
-                            },
-                            backgroundColor: Colors.grey[100],
-                            selectedColor: Colors.green[100],
-                            checkmarkColor: Colors.green[700],
-                          );
-                        }).toList(),
+                      Expanded(
+                        child: ListView(
+                          controller: scrollController,
+                          children: [
+                            // Price Range Section
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[50],
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.attach_money, color: Colors.green[700]),
+                                      const SizedBox(width: 8),
+                                      const Text(
+                                        'Price Range (per day)',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  RangeSlider(
+                                    values: RangeValues(tempMin, tempMax),
+                                    min: 0,
+                                    max: 100000,
+                                    divisions: 20,
+                                    labels: RangeLabels(
+                                      'LKR ${tempMin.round()}',
+                                      'LKR ${tempMax.round()}',
+                                    ),
+                                    onChanged: (values) {
+                                      setSheetState(() {
+                                        tempMin = values.start;
+                                        tempMax = values.end;
+                                      });
+                                    },
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green[100],
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Text(
+                                          'LKR ${tempMin.round()}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.green[700],
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green[100],
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Text(
+                                          'LKR ${tempMax.round()}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.green[700],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Rating Filter
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[50],
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.star, color: Colors.amber[700]),
+                                      const SizedBox(width: 8),
+                                      const Text(
+                                        'Minimum Rating',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [0.0, 3.0, 3.5, 4.0, 4.5].map((rating) {
+                                      return FilterChip(
+                                        label: Text(
+                                          rating == 0 ? 'Any' : '$rating+',
+                                          style: TextStyle(
+                                            color: tempRating == rating
+                                                ? Colors.white
+                                                : Colors.black87,
+                                          ),
+                                        ),
+                                        selected: tempRating == rating,
+                                        onSelected: (selected) {
+                                          setSheetState(() {
+                                            tempRating = selected ? rating : 0;
+                                          });
+                                        },
+                                        backgroundColor: Colors.grey[200],
+                                        selectedColor: Colors.amber[700],
+                                        checkmarkColor: Colors.white,
+                                      );
+                                    }).toList(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Machine Type
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[50],
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.category, color: Colors.green[700]),
+                                      const SizedBox(width: 8),
+                                      const Text(
+                                        'Machine Type',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: ['All', 'Corn', 'Rice', 'Premium', 'Budget']
+                                        .map((type) {
+                                      return FilterChip(
+                                        label: Text(
+                                          type,
+                                          style: TextStyle(
+                                            color: tempCategory == type
+                                                ? Colors.white
+                                                : Colors.black87,
+                                          ),
+                                        ),
+                                        selected: tempCategory == type,
+                                        onSelected: (selected) {
+                                          setSheetState(() {
+                                            tempCategory = selected ? type : 'All';
+                                          });
+                                        },
+                                        backgroundColor: Colors.grey[200],
+                                        selectedColor: Colors.green[700],
+                                        checkmarkColor: Colors.white,
+                                      );
+                                    }).toList(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Availability
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[50],
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.check_circle, color: Colors.green[700]),
+                                      const SizedBox(width: 8),
+                                      const Text(
+                                        'Show available only',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Switch(
+                                    value: tempAvailable,
+                                    onChanged: (value) {
+                                      setSheetState(() {
+                                        tempAvailable = value;
+                                      });
+                                    },
+                                    activeThumbColor: Colors.green[700],
+                                    activeTrackColor: Colors.green[200],
+                                    inactiveThumbColor: Colors.grey[400],
+                                    inactiveTrackColor: Colors.grey[200],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 20),
                       
-                      // Machine Type
-                      const Text('Machine Type',
-                          style: TextStyle(fontWeight: FontWeight.w500)),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        children: ['All', 'Corn', 'Rice'].map((type) {
-                          return FilterChip(
-                            label: Text(type),
-                            selected: tempCategory == type,
-                            onSelected: (selected) {
-                              setSheetState(() {
-                                tempCategory = selected ? type : 'All';
-                              });
-                            },
-                            backgroundColor: Colors.grey[100],
-                            selectedColor: Colors.green[100],
-                            checkmarkColor: Colors.green[700],
-                          );
-                        }).toList(),
-                      ),
-                      
-                      const Spacer(),
+                      const SizedBox(height: 16),
                       
                       // Action Buttons
                       Row(
                         children: [
                           Expanded(
-                            child: TextButton(
+                            child: OutlinedButton(
                               onPressed: () {
-                                // Reset all filters
                                 setSheetState(() {
                                   tempMin = 0;
                                   tempMax = 100000;
                                   tempRating = 0;
                                   tempCategory = 'All';
+                                  tempAvailable = false;
                                 });
                               },
-                              style: TextButton.styleFrom(
+                              style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.grey[700],
+                                side: BorderSide(color: Colors.grey[300]!),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                               child: const Text('Reset'),
                             ),
@@ -433,17 +740,26 @@ class _HomeScreenState extends State<HomeScreen> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
+                                elevation: 2,
                               ),
                               onPressed: () {
                                 setState(() {
                                   _priceRange = RangeValues(tempMin, tempMax);
                                   _selectedRating = tempRating;
                                   _selectedCategory = tempCategory;
+                                  _showAvailableOnly = tempAvailable;
+                                  _isFilterApplied = true;
                                   _applyAllFilters();
                                 });
                                 Navigator.pop(context);
                               },
-                              child: const Text('Apply Filters'),
+                              child: const Text(
+                                'Apply Filters',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ),
                         ],

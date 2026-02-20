@@ -21,8 +21,15 @@ dependencies:
   provider: ^6.1.2
   intl: ^0.19.0
   
-  # Image Picker
+  # Image Picker (for adding machine photos)
   image_picker: ^1.1.2
+  
+  # Payment Gateway - PayHere for Sri Lankan payments
+  payhere_mobilesdk_flutter: ^2.0.0
+  fluttertoast: ^8.2.8
+  
+  # Web Support Packages
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:

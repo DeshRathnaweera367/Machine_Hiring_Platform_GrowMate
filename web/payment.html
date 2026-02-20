@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayHere Payment</title>
+    <script src="https://www.payhere.lk/lib/payhere.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .payment-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4CAF50;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin: 20px auto;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #666;
+            margin: 5px 0;
+        }
+        .amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 20px 0;
+        }
+        .order-id {
+            background: #f5f5f5;
+            padding: 8px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .error {
+            color: #f44336;
+            margin: 10px 0;
+        }
+        .success {
+            color: #4CAF50;
+            margin: 10px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.cancel {
+            background: #f44336;
+        }
+        button.cancel:hover {
+            background: #da190b;
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container" id="paymentContainer">
+        <div id="loadingScreen">
+            <h2>Redirecting to PayHere</h2>
+            <div class="loader"></div>
+            <p>Please wait while we redirect you to the secure payment gateway...</p>
+        </div>
+
+        <div id="errorScreen" style="display: none;">
+            <h2 class="error">⚠️ Payment Error</h2>
+            <p id="errorMessage">Something went wrong. Please try again.</p>
+            <button onclick="closeWindow()" class="cancel">Close</button>
+        </div>
+
+        <div id="successScreen" style="display: none;">
+            <h2 class="success">✓ Payment Successful!</h2>
+            <p>Your payment has been processed successfully.</p>
+            <div class="order-id" id="successOrderId"></div>
+            <button onclick="closeWindow()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Parse parameters
+        const payment = {
+            "sandbox": urlParams.get('sandbox') === 'true',
+            "merchant_id": urlParams.get('merchant_id'),
+            "return_url": urlParams.get('return_url'),
+            "cancel_url": urlParams.get('cancel_url'),
+            "notify_url": urlParams.get('notify_url') || 'https://sandbox.payhere.lk/notify',
+            "order_id": urlParams.get('order_id'),
+            "items": urlParams.get('items'),
+            "amount": urlParams.get('amount'),
+            "currency": urlParams.get('currency') || 'LKR',
+            "first_name": urlParams.get('first_name'),
+            "last_name": urlParams.get('last_name'),
+            "email": urlParams.get('email'),
+            "phone": urlParams.get('phone'),
+            "address": urlParams.get('address'),
+            "city": urlParams.get('city'),
+            "country": urlParams.get('country') || 'Sri Lanka',
+            "delivery_address": urlParams.get('delivery_address'),
+            "delivery_city": urlParams.get('delivery_city'),
+            "delivery_country": urlParams.get('delivery_country') || 'Sri Lanka'
+        };
+
+        console.log('Payment details:', payment);
+
+        // Show loading screen initially
+        showScreen('loading');
+
+        // Setup PayHere callbacks
+        payhere.onCompleted = function onCompleted(orderId) {
+            console.log('Payment completed successfully:', orderId);
+            document.getElementById('successOrderId').textContent = 'Order ID: ' + orderId;
+            showScreen('success');
+            
+            // Send message to parent window
+            if (window.opener) {
+                window.opener.postMessage({
+                    type: 'PAYMENT_SUCCESS',
+                    orderId: orderId
+                }, '*');
+            }
+        };
+
+        payhere.onDismissed = function onDismissed() {
+            console.log('Payment was dismissed by user');
+            showScreen('error', 'Payment was cancelled');
+            
+            if (window.opener) {
+                window.opener.postMessage({
+                    type: 'PAYMENT_DISMISSED'
+                }, '*');
+            }
+        };
+
+        payhere.onError = function onError(error) {
+            console.error('Payment error:', error);
+            showScreen('error', 'Payment failed: ' + error);
+            
+            if (window.opener) {
+                window.opener.postMessage({
+                    type: 'PAYMENT_ERROR',
+                    error: error
+                }, '*');
+            }
+        };
+
+        // Function to show different screens
+        function showScreen(screen, message) {
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('errorScreen').style.display = 'none';
+            document.getElementById('successScreen').style.display = 'none';
+            
+            switch(screen) {
+                case 'loading':
+                    document.getElementById('loadingScreen').style.display = 'block';
+                    break;
+                case 'error':
+                    document.getElementById('errorScreen').style.display = 'block';
+                    if (message) {
+                        document.getElementById('errorMessage').textContent = message;
+                    }
+                    break;
+                case 'success':
+                    document.getElementById('successScreen').style.display = 'block';
+                    break;
+            }
+        }
+
+        // Function to close window
+        function closeWindow() {
+            if (window.opener) {
+                window.close();
+            } else {
+                // If no opener, redirect back
+                window.location.href = payment.cancel_url;
+            }
+        }
+
+        // Start the payment after a small delay
+        setTimeout(() => {
+            try {
+                console.log('Starting PayHere payment...');
+                payhere.startPayment(payment);
+            } catch (e) {
+                console.error('Failed to start payment:', e);
+                showScreen('error', 'Failed to initialize payment: ' + e.message);
+            }
+        }, 1000);
+
+        // ✅ FIXED: Make closeWindow available globally for button clicks
+        window.closeWindow = closeWindow;
+    </script>
+</body>
+</html>
